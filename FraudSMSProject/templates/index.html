@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fraud SMS Detector</title>
+  <style>
+    :root{
+      --bg1:#0f172a;
+      --bg2:#111827;
+      --card:rgba(255,255,255,0.08);
+      --stroke:rgba(255,255,255,0.16);
+      --text:rgba(255,255,255,0.92);
+      --muted:rgba(255,255,255,0.68);
+      --shadow: 0 20px 60px rgba(0,0,0,0.45);
+      --radius: 18px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(900px 500px at 15% 10%, rgba(56,189,248,0.35), transparent 60%),
+        radial-gradient(700px 400px at 85% 25%, rgba(167,139,250,0.35), transparent 55%),
+        radial-gradient(800px 500px at 50% 95%, rgba(34,197,94,0.18), transparent 55%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+
+    .wrap{
+      width:min(980px, 100%);
+      display:grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap:18px;
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      padding:22px;
+    }
+
+    .header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:16px;
+    }
+
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .title h1{
+      margin:0;
+      font-size:26px;
+      letter-spacing:0.2px;
+    }
+    .title p{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.35;
+    }
+
+    .pill{
+      font-size:12px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--stroke);
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    textarea{
+      width:100%;
+      border-radius: 14px;
+      padding:14px 14px;
+      border:1px solid rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.18);
+      color:var(--text);
+      outline:none;
+      resize: vertical;
+      min-height: 140px;
+      font-size:14px;
+      line-height:1.45;
+    }
+    textarea::placeholder{ color: rgba(255,255,255,0.45); }
+
+    .row{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      margin-top:12px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      border-radius: 14px;
+      padding:12px 14px;
+      font-weight:650;
+      color: rgba(255,255,255,0.92);
+      background: linear-gradient(135deg, rgba(56,189,248,0.95), rgba(167,139,250,0.95));
+      box-shadow: 0 12px 30px rgba(56,189,248,0.15);
+      transition: transform .12s ease, filter .12s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); filter:brightness(1.05); }
+    .btn:active{ transform: translateY(0px); }
+
+    .hint{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .side{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    .resultBox{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      width:fit-content;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--stroke);
+      font-size:12px;
+      color:var(--muted);
+      background: rgba(0,0,0,0.12);
+    }
+
+    .status{
+      font-size:22px;
+      font-weight:800;
+      letter-spacing:0.2px;
+      margin:0;
+    }
+
+    .status.safe{ color: rgba(34,197,94,0.95); }
+    .status.fraud{ color: rgba(239,68,68,0.95); }
+
+    .meter{
+      height:10px;
+      background: rgba(255,255,255,0.10);
+      border-radius:999px;
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,0.14);
+    }
+    .fill{
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      background: linear-gradient(90deg, rgba(34,197,94,0.9), rgba(56,189,248,0.9), rgba(167,139,250,0.9));
+      transition: width 0.35s ease;
+    }
+
+    .kv{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:6px;
+    }
+    .chip{
+      font-size:12px;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.16);
+      background: rgba(0,0,0,0.18);
+      color: rgba(255,255,255,0.80);
+    }
+
+    .mini{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+      margin:0;
+    }
+
+    .footerNote{
+      margin-top:auto;
+      font-size:11px;
+      color: rgba(255,255,255,0.55);
+    }
+
+    @media (max-width: 860px){
+      .wrap{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Main Input -->
+    <div class="card">
+      <div class="header">
+        <div class="title">
+          <h1>AI Fraud SMS Detector</h1>
+          <p>Paste any message to check whether it looks like a <b>fraud/spam</b> SMS or a <b>safe</b> SMS. Shows confidence & risky terms.</p>
+        </div>
+        <div class="pill">Naive Bayes + TF-IDF</div>
+      </div>
+
+      <form method="POST">
+        <textarea name="message" placeholder="Example: URGENT! Your bank account is blocked. Click this link to verify..."></textarea>
+
+        <div class="row">
+          <button class="btn" type="submit">Analyze Message</button>
+          <span class="hint">Tip: Try keywords like “urgent”, “win”, “click”, “bank”, “OTP”.</span>
+        </div>
+      </form>
+    </div>
+
+    <!-- Results / Insights -->
+    <div class="side">
+      <div class="card resultBox">
+        <div class="badge">Prediction</div>
+
+        {% if prediction %}
+          {% set is_fraud = 'FRAUD' in prediction %}
+          <p class="status {{ 'fraud' if is_fraud else 'safe' }}">{{ prediction }}</p>
+
+          <div class="kv">
+            <span>Confidence</span>
+            <span><b>{{ prob }}%</b></span>
+          </div>
+          <div class="meter">
+            <div class="fill" id="fillBar"></div>
+          </div>
+
+          <div style="margin-top:10px;">
+            <div class="badge">Risky words found</div>
+            {% if words %}
+              <div class="chips">
+                {% for w in words.split(',') %}
+                  {% if w.strip() %}
+                    <span class="chip">{{ w.strip() }}</span>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="mini">No common risky keywords found in this message. (It can still be suspicious depending on context.)</p>
+            {% endif %}
+          </div>
+        {% else %}
+          <p class="mini">No analysis yet. Enter a message and click <b>Analyze Message</b>.</p>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <div class="badge">How it works</div>
+        <p class="mini">
+          The system converts text into numeric features using <b>TF-IDF</b> and predicts using a trained <b>Naive Bayes</b> model.
+          The “risky words” section is a simple explanation layer to make results understandable during demos.
+        </p>
+        <div class="footerNote">Made for Mini Project Demo • HTML + Flask (upgrade to React later)</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Fill confidence bar (only if prob is present)
+    const prob = "{{ prob }}";
+    const fill = document.getElementById("fillBar");
+    if (fill && prob) {
+      const v = Math.max(0, Math.min(100, parseFloat(prob)));
+      fill.style.width = v + "%";
+    }
+  </script>
+</body>
+</html>
