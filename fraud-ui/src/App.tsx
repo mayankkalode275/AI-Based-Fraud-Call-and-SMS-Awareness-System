@@ -59,12 +59,14 @@ export default function App() {
   const confidenceWidth = Math.max(0, Math.min(100, data?.confidence ?? 0));
 
   // Risk Level (Option B)
+  // UPDATED Risk Level Logic
   const riskLevel =
-    (data?.confidence ?? 0) <= 60
-      ? "HIGH RISK"
-      : (data?.confidence ?? 0) >= 60
+    data?.prediction?.toUpperCase().includes("SAFE") &&
+    (data?.confidence ?? 0)>= 95
+      ? "LOW RISK"
+      : (data?.confidence ?? 0) > 60
       ? "MEDIUM RISK"
-      : "LOW RISK";
+      : "HIGH RISK";
 
   const riskColor =
     riskLevel === "HIGH RISK"
@@ -72,6 +74,7 @@ export default function App() {
       : riskLevel === "MEDIUM RISK"
       ? "rgba(167,139,250,0.95)"
       : "rgba(0,255,180,0.95)";
+
 
   const checkSMS = async () => {
     setError("");
