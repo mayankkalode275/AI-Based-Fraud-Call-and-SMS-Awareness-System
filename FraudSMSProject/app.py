@@ -62,14 +62,16 @@ def predict():
 
 @app.route("/metrics", methods=["GET"])
 def metrics():
-    
-    m = compute_metrics("combined_dataset.csv")
-    m = compute_metrics("spam.csv")
-    m = compute_metrics("spam_texts.csv")
-    return jsonify(m)
 
+    combined = compute_metrics("combined_dataset.csv")
+    spam1 = compute_metrics("spam.csv")
+    spam2 = compute_metrics("spam_texts.csv")
 
-
+    return jsonify({
+        "combined_dataset": combined,
+        "spam_dataset": spam1,
+        "spam_texts_dataset": spam2
+    })
 
 if __name__ == "__main__":
     app.run(debug=True)
