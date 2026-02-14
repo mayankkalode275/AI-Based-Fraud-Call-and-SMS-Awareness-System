@@ -20,7 +20,38 @@ def predict():
 
     prediction = "FRAUD SMS" if result == 1 else "SAFE SMS"
 
-    risky = ["win","urgent","click","bank","account","offer","otp","prize","verify","blocked"]
+    risky = [
+    # Urgency / Pressure
+    "urgent", "immediately", "now", "limited", "hurry", "final", "alert",
+    "warning", "important", "act", "today", "expire", "expired", "suspend",
+    "suspended", "blocked", "deactivated", "locked",
+
+    # Money / Prize / Lottery
+    "win", "winner", "won", "prize", "lottery", "reward", "cash", 
+    "bonus", "gift", "free", "congratulations", "jackpot", "claim",
+
+    # Banking / Financial
+    "bank", "account", "atm", "card", "credit", "debit",
+    "transaction", "payment", "refund", "withdraw", "deposit",
+    "balance", "upi", "netbanking", "kyc", "pan", "aadhaar",
+
+    # OTP / Verification
+    "otp", "verify", "verification", "code", "pin",
+    "secure", "security", "update", "confirm", "validate",
+
+    # Phishing / Links
+    "click", "link", "http", "www", "login", "signin",
+    "reset", "password", "details", "credentials",
+
+    # Threat / Legal Fear
+    "legal", "notice", "court", "penalty", "fine",
+    "complaint", "fraud", "illegal", "tax", "income",
+
+    # Subscription / Service Scam
+    "subscription", "renew", "recharge", "sim", "mobile",
+    "offer", "discount", "limited offer", "deal"
+]
+
     found = [w for w in risky if w in msg.lower()]
 
     return jsonify({
@@ -31,8 +62,14 @@ def predict():
 
 @app.route("/metrics", methods=["GET"])
 def metrics():
+    
     m = compute_metrics("combined_dataset.csv")
+    m = compute_metrics("spam.csv")
+    m = compute_metrics("spam_texts.csv")
     return jsonify(m)
+
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
