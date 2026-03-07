@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import "./App.css";
 
 type PredictResponse = {
   prediction: string;
@@ -20,9 +21,16 @@ type HistoryItem = {
   risky_words: string[];
 };
 
+type SpeechResponse = {
+  transcription: string;
+  prediction: string;
+  confidence: number;
+  risky_words: string[];
+};
+
 const API = "http://127.0.0.1:5000";
 
-type Screen = "home" | "choose" | "sms";
+type Screen = "home" | "choose" | "sms" | "call";
 
 export default function App() {
   // Flow screens
@@ -50,6 +58,118 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("fraud_history", JSON.stringify(history));
   }, [history]);
+
+  // ── Call detection state ──
+  const [recording, setRecording] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const [callData, setCallData] = useState<SpeechResponse | null>(null);
+  const [callLoading, setCallLoading] = useState(false);
+  const [callError, setCallError] = useState("");
+  const [callHistory, setCallHistory] = useState<HistoryItem[]>(() => {
+    try {
+      const raw = localStorage.getItem("fraud_call_history");
+      return raw ? (JSON.parse(raw) as HistoryItem[]) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem("fraud_call_history", JSON.stringify(callHistory));
+  }, [callHistory]);
+
+  const startRecording = async () => {
+    setCallError("");
+    setCallData(null);
+    audioChunksRef.current = [];
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      mediaRecorderRef.current = mr;
+
+      mr.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      mr.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        const formData = new FormData();
+        formData.append("audio", blob, "recording.webm");
+
+        setCallLoading(true);
+        try {
+          const res = await fetch(`${API}/speech`, {
+            method: "POST",
+            body: formData,
+          });
+          if (!res.ok) {
+            const errJson = await res.json().catch(() => ({}));
+            throw new Error((errJson as any).error || "Backend error. Is Flask running?");
+          }
+          const json = (await res.json()) as SpeechResponse;
+          setCallData(json);
+
+          const item: HistoryItem = {
+            time: new Date().toLocaleString(),
+            message: json.transcription,
+            prediction: json.prediction,
+            confidence: json.confidence,
+            risky_words: json.risky_words,
+          };
+          setCallHistory((prev) => [item, ...prev].slice(0, 25));
+        } catch (e: any) {
+          setCallError(e?.message || "Something went wrong");
+        } finally {
+          setCallLoading(false);
+        }
+      };
+
+      mr.start();
+      setRecording(true);
+    } catch (e: any) {
+      setCallError(e?.message || "Microphone access denied or unavailable");
+    }
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current?.stop();
+    setRecording(false);
+  };
+
+  const clearCall = () => {
+    setCallData(null);
+    setCallError("");
+  };
+
+  const clearCallHistory = () => setCallHistory([]);
+
+  const downloadCallReport = () => {
+    const lines: string[] = [];
+    lines.push("AI Fraud Call Detector - Report");
+    lines.push(`Generated: ${new Date().toLocaleString()}`);
+    lines.push("--------------------------------------------------");
+    lines.push(`Total checks in history: ${callHistory.length}`);
+    lines.push("");
+
+    callHistory.forEach((h, idx) => {
+      lines.push(`#${idx + 1}  Time: ${h.time}`);
+      lines.push(`Transcription: ${h.message}`);
+      lines.push(`Prediction: ${h.prediction}`);
+      lines.push(`Confidence: ${h.confidence}%`);
+      lines.push(`Risky Words: ${h.risky_words.join(", ") || "None"}`);
+      lines.push("--------------------------------------------------");
+    });
+
+    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "fraud_call_report.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const isFraud = useMemo(
     () => data?.prediction?.toUpperCase().includes("FRAUD") ?? false,
@@ -187,7 +307,7 @@ export default function App() {
             <div style={styles.modalIcon}>🛡️</div>
             <h2 style={styles.modalTitle}>Welcome to AI Fraud Detector</h2>
             <p style={styles.modalText}>
-              Detect suspicious <b>Fraud SMS</b> using Machine Learning, confidence score,
+              Detect suspicious <b>Fraud SMS and Fraud Calls</b> using Machine Learning, confidence score,
               risky keywords, history, and accuracy analytics.
             </p>
 
@@ -221,15 +341,15 @@ export default function App() {
             <div style={{ display: "grid", gap: 12, marginTop: 14 }}>
               <button
                 style={styles.modeCard}
-                onClick={() =>
-                  alert("Call Fraud Detector: Coming Soon ✅\n(We will add later)")
-                }
+                onClick={() => {
+                  setScreen("call");
+                }}
               >
                 <div style={styles.modeTop}>
                   <span style={styles.modeIcon}>📞</span>
                   <div>
                     <div style={styles.modeTitle}>AI Fraud Detector for Call</div>
-                    <div style={styles.modeSub}>Coming soon (next update)</div>
+                    <div style={styles.modeSub}>Record voice &amp; detect fraud calls</div>
                   </div>
                 </div>
               </button>
@@ -259,6 +379,232 @@ export default function App() {
               </button>
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ========================= CALL APP =========================
+  if (screen === "call") {
+    const isCallFraud = callData?.prediction?.toUpperCase().includes("FRAUD") ?? false;
+    const callConfidenceWidth = Math.max(0, Math.min(100, callData?.confidence ?? 0));
+    const callRiskLevel =
+      callData?.prediction?.toUpperCase().includes("SAFE") &&
+      (callData?.confidence ?? 0) >= 95
+        ? "LOW RISK"
+        : (callData?.confidence ?? 0) > 60
+        ? "MEDIUM RISK"
+        : "HIGH RISK";
+    const callRiskColor =
+      callRiskLevel === "HIGH RISK"
+        ? "rgba(255,60,130,0.95)"
+        : callRiskLevel === "MEDIUM RISK"
+        ? "rgba(167,139,250,0.95)"
+        : "rgba(0,255,180,0.95)";
+
+    return (
+      <div style={styles.page}>
+        <div style={styles.gridDots} />
+        <div style={styles.glowGreen} />
+        <div style={styles.glowPurple} />
+
+        <div style={styles.shell}>
+          <header style={styles.header}>
+            <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              <div style={styles.logo}>📞</div>
+              <div>
+                <h1 style={styles.title}>AI Fraud Call Detector</h1>
+                <p style={styles.sub}>
+                  Cyber-Neon UI • React+TS • Flask API • Speech-to-Text • TF-IDF
+                </p>
+              </div>
+            </div>
+            <button style={styles.btnOutlineGreen} onClick={() => setScreen("choose")}>
+              ← Back
+            </button>
+          </header>
+
+          <div style={styles.twoCol}>
+            {/* Left panel */}
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
+                <h3 style={styles.h3}>Record Voice</h3>
+                <span style={recording ? styles.pillPink : styles.pillGreen}>
+                  {recording ? "● REC" : "READY"}
+                </span>
+              </div>
+
+              {/* Microphone button */}
+              <div style={styles.micContainer}>
+                <button
+                  className={recording ? "recording-pulse" : ""}
+                  style={recording ? styles.micBtnRecording : styles.micBtnReady}
+                  onClick={recording ? stopRecording : startRecording}
+                  title={recording ? "Stop Recording" : "Start Recording"}
+                >
+                  🎙️
+                </button>
+
+                <div style={{ fontSize: 13, color: recording ? "rgba(255,60,130,0.95)" : "rgba(255,255,255,0.65)" }}>
+                  {recording ? "● Recording..." : "Ready"}
+                </div>
+
+                <div style={styles.row}>
+                  <button
+                    style={{
+                      ...(recording ? styles.btnPink : styles.btnGreen),
+                      minWidth: 140,
+                    }}
+                    onClick={recording ? stopRecording : startRecording}
+                    disabled={callLoading}
+                  >
+                    {recording ? "⏹ Stop Recording" : "▶ Start Recording"}
+                  </button>
+                  <button onClick={clearCall} style={styles.btnPurple}>
+                    Clear
+                  </button>
+                </div>
+              </div>
+
+              {callLoading && (
+                <div style={{ ...styles.muted, textAlign: "center", padding: 8 }}>
+                  Analyzing audio...
+                </div>
+              )}
+              {callError && <div style={styles.alert}>{callError}</div>}
+
+              <div style={{ marginTop: 16 }}>
+                <h3 style={styles.h3}>Result</h3>
+
+                {!callData ? (
+                  <div style={styles.empty}>
+                    No result yet. Record your voice and stop to analyze.
+                  </div>
+                ) : (
+                  <div style={styles.resultBox}>
+                    <div style={styles.resultTop}>
+                      {/* Transcription */}
+                      <div>
+                        <div style={styles.smallLabel}>Transcription</div>
+                        <div
+                          style={{
+                            marginTop: 6,
+                            padding: "10px 12px",
+                            borderRadius: 12,
+                            border: "1px solid rgba(255,255,255,0.12)",
+                            background: "rgba(0,0,0,0.20)",
+                            fontSize: 14,
+                            lineHeight: 1.5,
+                            color: "rgba(255,255,255,0.90)",
+                          }}
+                        >
+                          {callData.transcription}
+                        </div>
+                      </div>
+
+                      <span
+                        style={{
+                          ...styles.status,
+                          borderColor: isCallFraud
+                            ? "rgba(255,60,130,0.8)"
+                            : "rgba(0,255,180,0.8)",
+                          boxShadow: isCallFraud
+                            ? "0 0 18px rgba(255,60,130,0.25)"
+                            : "0 0 18px rgba(0,255,180,0.22)",
+                        }}
+                      >
+                        {callData.prediction}
+                      </span>
+
+                      <div style={styles.kv}>
+                        <span style={styles.k}>Confidence</span>
+                        <span style={styles.v}>{callData.confidence.toFixed(2)}%</span>
+                      </div>
+
+                      <div style={styles.meter}>
+                        <div style={{ ...styles.fill, width: `${callConfidenceWidth}%` }} />
+                      </div>
+
+                      <div style={{ marginTop: 8, fontWeight: 950, fontSize: 13 }}>
+                        Risk Level:{" "}
+                        <span style={{ color: callRiskColor, textShadow: `0 0 12px ${callRiskColor}55` }}>
+                          {callRiskLevel}
+                        </span>
+                      </div>
+
+                      <div style={{ marginTop: 12 }}>
+                        <div style={styles.smallLabel}>Risky Words</div>
+                        {callData.risky_words?.length ? (
+                          <div style={styles.chips}>
+                            {callData.risky_words.map((w) => (
+                              <Chip key={w} text={w} />
+                            ))}
+                          </div>
+                        ) : (
+                          <div style={styles.muted}>None found.</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right panel */}
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
+                <div>
+                  <h3 style={styles.h3}>Call History</h3>
+                  <div style={styles.muted}>
+                    Last {callHistory.length} checks (saved on this PC)
+                  </div>
+                </div>
+                <div style={styles.actions}>
+                  <button onClick={downloadCallReport} style={styles.btnOutlineGreen}>
+                    Download Report
+                  </button>
+                  <button onClick={clearCallHistory} style={styles.btnOutlinePink}>
+                    Clear
+                  </button>
+                </div>
+              </div>
+
+              {callHistory.length === 0 ? (
+                <div style={styles.empty}>No history yet.</div>
+              ) : (
+                <div style={styles.historyList}>
+                  {callHistory.map((h, i) => {
+                    const fraud = h.prediction.toUpperCase().includes("FRAUD");
+                    return (
+                      <div key={i} style={styles.historyItem}>
+                        <div style={styles.historyTop}>
+                          <span style={styles.time}>{h.time}</span>
+                          <span
+                            style={{
+                              ...styles.miniTag,
+                              borderColor: fraud
+                                ? "rgba(255,60,130,0.8)"
+                                : "rgba(0,255,180,0.8)",
+                            }}
+                          >
+                            {h.prediction} • {h.confidence.toFixed(2)}%
+                          </span>
+                        </div>
+                        <div style={styles.msg}>{h.message}</div>
+                        <div style={styles.riskyLine}>
+                          Risky: <b>{h.risky_words.join(", ") || "None"}</b>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <footer style={styles.footer}>
+            Cyber-Neon Theme • Built for Mini Project Demo
+          </footer>
         </div>
       </div>
     );
@@ -715,6 +1061,63 @@ const styles: Record<string, React.CSSProperties> = {
     background: "rgba(0,255,180,0.08)",
     fontSize: 12,
     fontWeight: 900,
+  },
+
+  pillPink: {
+    padding: "7px 10px",
+    borderRadius: 999,
+    border: "1px solid rgba(255,60,130,0.50)",
+    color: "rgba(255,60,130,0.95)",
+    background: "rgba(255,60,130,0.10)",
+    fontSize: 12,
+    fontWeight: 900,
+  },
+
+  btnPink: {
+    border: "1px solid rgba(255,60,130,0.50)",
+    borderRadius: 14,
+    padding: "12px 14px",
+    fontWeight: 900,
+    color: "rgba(255,60,130,0.95)",
+    background: "rgba(255,60,130,0.10)",
+    boxShadow: "0 0 18px rgba(255,60,130,0.15)",
+    cursor: "pointer",
+  },
+
+  micContainer: {
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "center",
+    gap: 16,
+    padding: "20px 0",
+  },
+
+  micBtnReady: {
+    width: 90,
+    height: 90,
+    borderRadius: "50%",
+    border: "2px solid rgba(0,255,180,0.4)",
+    background: "rgba(0,255,180,0.08)",
+    fontSize: 36,
+    cursor: "pointer",
+    display: "grid",
+    placeItems: "center",
+    transition: "all 0.2s ease",
+    color: "white",
+  },
+
+  micBtnRecording: {
+    width: 90,
+    height: 90,
+    borderRadius: "50%",
+    border: "2px solid rgba(255,60,130,0.8)",
+    background: "rgba(255,60,130,0.15)",
+    fontSize: 36,
+    cursor: "pointer",
+    display: "grid",
+    placeItems: "center",
+    transition: "all 0.2s ease",
+    color: "white",
   },
 
   textarea: {
