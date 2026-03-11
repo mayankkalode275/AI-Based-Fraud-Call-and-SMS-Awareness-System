@@ -54,3 +54,6 @@ def compute_metrics(csv_path="combined_dataset.csv"):
         "confusion_matrix": cm.tolist(),
         "labels": ["Safe (0)", "Fraud (1)"]
     }
+
+
+
