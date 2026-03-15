@@ -22,7 +22,7 @@ type HistoryItem = {
 
 const API = "http://127.0.0.1:5000";
 
-type Screen = "home" | "choose" | "sms";
+type Screen = "home" | "choose" | "sms" ;
 
 export default function App() {
   // Flow screens

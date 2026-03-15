@@ -120,3 +120,23 @@ def metrics():
 
 if __name__ == "__main__":
     app.run(debug=True)
+    
+    ###call
+    from call_rules import detect_call
+
+@app.route("/detect-call", methods=["POST"])
+def detect_call_api():
+
+    data = request.json
+
+    phone = data.get("phone_number")
+    duration = data.get("duration",0)
+    frequency = data.get("frequency",1)
+
+    prediction, score, reasons = detect_call(phone,duration,frequency)
+
+    return jsonify({
+        "prediction": prediction,
+        "risk_score": score,
+        "reasons": reasons
+    })
