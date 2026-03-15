@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-
+import CallDetector from "./components/CallDetector"
 type PredictResponse = {
   prediction: string;
   confidence: number;
@@ -22,7 +22,11 @@ type HistoryItem = {
 
 const API = "http://127.0.0.1:5000";
 
-type Screen = "home" | "choose" | "sms" ;
+
+
+
+
+type Screen = "home" | "choose" | "sms" | "call";
 
 export default function App() {
   // Flow screens
@@ -221,15 +225,15 @@ export default function App() {
             <div style={{ display: "grid", gap: 12, marginTop: 14 }}>
               <button
                 style={styles.modeCard}
-                onClick={() =>
-                  alert("Call Fraud Detector: Coming Soon ✅\n(We will add later)")
-                }
+                onClick={() => {
+  setScreen("call");
+}}
               >
                 <div style={styles.modeTop}>
                   <span style={styles.modeIcon}>📞</span>
                   <div>
                     <div style={styles.modeTitle}>AI Fraud Detector for Call</div>
-                    <div style={styles.modeSub}>Coming soon (next update)</div>
+                    <div style={styles.modeSub}>Start Detecting suspicious call now </div>
                   </div>
                 </div>
               </button>
@@ -263,6 +267,86 @@ export default function App() {
       </div>
     );
   }
+
+// ========================= CALL APP =========================
+if (screen === "call") {
+  return (
+    <div style={styles.page}>
+      <div style={styles.gridDots} />
+      <div style={styles.glowGreen} />
+      <div style={styles.glowPurple} />
+
+      <div style={styles.shell}>
+        <header style={styles.header}>
+          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            <div style={styles.logo}>📞</div>
+            <div>
+              <h1 style={styles.title}>AI Fraud Call Detector</h1>
+              <p style={styles.sub}>
+                Cyber-Neon UI • Detect scam calls using AI
+              </p>
+            </div>
+          </div>
+
+          <button
+            style={styles.btnOutlineGreen}
+            onClick={() => setScreen("choose")}
+          >
+            ← Back
+          </button>
+        </header>
+
+        <div style={styles.twoCol}>
+          {/* LEFT SIDE */}
+          <div style={styles.card}>
+            <div style={styles.cardHeader}>
+              <h3 style={styles.h3}>Analyze Call</h3>
+              <span style={styles.pillGreen}>LIVE</span>
+            </div>
+
+            <div style={{ marginTop: 12 }}>
+              <CallDetector />
+            </div>
+          </div>
+
+          {/* RIGHT SIDE */}
+          <div style={styles.card}>
+            <div style={styles.cardHeader}>
+              <div>
+                <h3 style={styles.h3}>Fraud Prevention Tips</h3>
+                <div style={styles.muted}>
+                  Common scam call patterns
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 12, lineHeight: 1.6 }}>
+              <div style={styles.empty}>
+                📞 Unknown numbers asking for OTP or bank details are usually scams.
+              </div>
+
+              <div style={styles.empty}>
+                ⚠️ Banks or government agencies never ask for OTP or passwords.
+              </div>
+
+              <div style={styles.empty}>
+                🔗 Do not trust urgent payment requests during calls.
+              </div>
+
+              <div style={styles.empty}>
+                🛡 Always verify suspicious callers before sharing information.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer style={styles.footer}>
+          Cyber-Neon Theme • Call Fraud Detection Module
+        </footer>
+      </div>
+    </div>
+  );
+}
 
   // ========================= SMS APP =========================
   return (
@@ -644,7 +728,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: "1px solid rgba(255,255,255,0.14)",
     fontSize: 24, // UPDATED
   },
-  modeTitle: { fontWeight: 950, fontSize: 18 }, // UPDATED
+  modeTitle: { fontWeight: 950,color:"rgba(0,255,180,0.95)", fontSize: 18 }, // UPDATED
   modeSub: { fontSize: 14, color: "rgba(255,255,255,0.70)", marginTop: 6 }, // UPDATED
 
   shell: { maxWidth: 1120, margin: "0 auto", position: "relative" },
