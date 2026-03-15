@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-
+import CallDetector from "./components/CallDetector"
 type PredictResponse = {
   prediction: string;
   confidence: number;
@@ -22,8 +22,7 @@ type HistoryItem = {
 
 const API = "http://127.0.0.1:5000";
 
-type Screen = "home" | "choose" | "sms";
-
+type Screen = "home" | "choose" | "sms" | "call";
 export default function App() {
   // Flow screens
   const [screen, setScreen] = useState<Screen>("home");
@@ -221,9 +220,9 @@ export default function App() {
             <div style={{ display: "grid", gap: 12, marginTop: 14 }}>
               <button
                 style={styles.modeCard}
-                onClick={() =>
-                  alert("Call Fraud Detector: Coming Soon ✅\n(We will add later)")
-                }
+                onClick={() => {
+  setScreen("call");
+}}
               >
                 <div style={styles.modeTop}>
                   <span style={styles.modeIcon}>📞</span>
@@ -263,6 +262,46 @@ export default function App() {
       </div>
     );
   }
+
+// ========================= CALL APP =========================
+if (screen === "call") {
+  return (
+    <div style={styles.page}>
+      <div style={styles.gridDots} />
+      <div style={styles.glowGreen} />
+      <div style={styles.glowPurple} />
+
+      <div style={styles.shell}>
+        <header style={styles.header}>
+          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            <div style={styles.logo}>📞</div>
+            <div>
+              <h1 style={styles.title}>AI Fraud Call Detector</h1>
+              <p style={styles.sub}>
+                Upload a call recording and detect scam calls using AI
+              </p>
+            </div>
+          </div>
+
+          <button
+            style={styles.btnOutlineGreen}
+            onClick={() => setScreen("choose")}
+          >
+            ← Back
+          </button>
+        </header>
+
+        <div style={styles.card}>
+          <CallDetector />
+        </div>
+
+        <footer style={styles.footer}>
+          Scam Shield • Call Detection Module
+        </footer>
+      </div>
+    </div>
+  );
+}
 
   // ========================= SMS APP =========================
   return (
