@@ -590,7 +590,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: "1px solid rgba(255,255,255,0.14)",
     fontSize: 24,
   },
-  modeTitle: { fontWeight: 950,color:"rgba(0,255,180,0.95)", fontSize: 18 },
+  modeTitle: { fontWeight: 950,color: "rgba(0, 180, 140, 0.95)", fontSize: 18 },
   modeSub: { fontSize: 14, color: "rgba(255,255,255,0.70)", marginTop: 6 },
   shell: { maxWidth: 1120, margin: "0 auto", position: "relative" },
   header: {
