@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import CallDetector from "./components/CallDetector"
+
 type PredictResponse = {
   prediction: string;
   confidence: number;
@@ -22,18 +23,11 @@ type HistoryItem = {
 
 const API = "http://127.0.0.1:5000";
 
-
-
-
-
 type Screen = "home" | "choose" | "sms" | "call";
 
 export default function App() {
   // Flow screens
   const [screen, setScreen] = useState<Screen>("home");
-
-  // tabs inside sms screen
-  const [tab, setTab] = useState<"detector" | "metrics">("detector");
 
   // detector state
   const [sms, setSms] = useState("");
@@ -62,11 +56,9 @@ export default function App() {
 
   const confidenceWidth = Math.max(0, Math.min(100, data?.confidence ?? 0));
 
-  // Risk Level (Option B)
-  // UPDATED Risk Level Logic
   const riskLevel =
     data?.prediction?.toUpperCase().includes("SAFE") &&
-    (data?.confidence ?? 0)>= 95
+    (data?.confidence ?? 0) >= 95
       ? "LOW RISK"
       : (data?.confidence ?? 0) > 60
       ? "MEDIUM RISK"
@@ -78,7 +70,6 @@ export default function App() {
       : riskLevel === "MEDIUM RISK"
       ? "rgba(167,139,250,0.95)"
       : "rgba(0,255,180,0.95)";
-
 
   const checkSMS = async () => {
     setError("");
@@ -146,33 +137,6 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
-  // metrics
-  const [metrics, setMetrics] = useState<MetricsResponse | null>(null);
-  const [metricsErr, setMetricsErr] = useState("");
-  const [metricsLoading, setMetricsLoading] = useState(false);
-
-  const loadMetrics = async () => {
-    setMetricsErr("");
-    setMetricsLoading(true);
-    try {
-      const res = await fetch(`${API}/metrics`);
-      if (!res.ok) throw new Error("Failed to load metrics (backend issue).");
-      const json = (await res.json()) as MetricsResponse;
-      setMetrics(json);
-    } catch (e: any) {
-      setMetricsErr(e?.message || "Metrics error");
-    } finally {
-      setMetricsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (screen === "sms" && tab === "metrics" && !metrics && !metricsLoading) {
-      loadMetrics();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, tab]);
-
   const Chip = ({ text }: { text: string }) => (
     <span style={styles.chip}>{text}</span>
   );
@@ -225,9 +189,7 @@ export default function App() {
             <div style={{ display: "grid", gap: 12, marginTop: 14 }}>
               <button
                 style={styles.modeCard}
-                onClick={() => {
-  setScreen("call");
-}}
+                onClick={() => setScreen("call")}
               >
                 <div style={styles.modeTop}>
                   <span style={styles.modeIcon}>📞</span>
@@ -240,10 +202,7 @@ export default function App() {
 
               <button
                 style={styles.modeCard}
-                onClick={() => {
-                  setScreen("sms");
-                  setTab("detector");
-                }}
+                onClick={() => setScreen("sms")}
               >
                 <div style={styles.modeTop}>
                   <span style={styles.modeIcon}>💬</span>
@@ -268,85 +227,80 @@ export default function App() {
     );
   }
 
-// ========================= CALL APP =========================
-if (screen === "call") {
-  return (
-    <div style={styles.page}>
-      <div style={styles.gridDots} />
-      <div style={styles.glowGreen} />
-      <div style={styles.glowPurple} />
+  // ========================= CALL APP =========================
+  if (screen === "call") {
+    return (
+      <div style={styles.page}>
+        <div style={styles.gridDots} />
+        <div style={styles.glowGreen} />
+        <div style={styles.glowPurple} />
 
-      <div style={styles.shell}>
-        <header style={styles.header}>
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            <div style={styles.logo}>📞</div>
-            <div>
-              <h1 style={styles.title}>AI Fraud Call Detector</h1>
-              <p style={styles.sub}>
-                Cyber-Neon UI • Detect scam calls using AI
-              </p>
-            </div>
-          </div>
-
-          <button
-            style={styles.btnOutlineGreen}
-            onClick={() => setScreen("choose")}
-          >
-            ← Back
-          </button>
-        </header>
-
-        <div style={styles.twoCol}>
-          {/* LEFT SIDE */}
-          <div style={styles.card}>
-            <div style={styles.cardHeader}>
-              <h3 style={styles.h3}>Analyze Call</h3>
-              <span style={styles.pillGreen}>LIVE</span>
-            </div>
-
-            <div style={{ marginTop: 12 }}>
-              <CallDetector />
-            </div>
-          </div>
-
-          {/* RIGHT SIDE */}
-          <div style={styles.card}>
-            <div style={styles.cardHeader}>
+        <div style={styles.shell}>
+          <header style={styles.header}>
+            <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              <div style={styles.logo}>📞</div>
               <div>
-                <h3 style={styles.h3}>Fraud Prevention Tips</h3>
-                <div style={styles.muted}>
-                  Common scam call patterns
+                <h1 style={styles.title}>AI Fraud Call Detector</h1>
+                <p style={styles.sub}>
+                  Cyber-Neon UI • Detect scam calls using AI
+                </p>
+              </div>
+            </div>
+
+            <button
+              style={styles.btnOutlineGreen}
+              onClick={() => setScreen("choose")}
+            >
+              ← Back
+            </button>
+          </header>
+
+          <div style={styles.twoCol}>
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
+                <h3 style={styles.h3}>Analyze Call</h3>
+                <span style={styles.pillGreen}>LIVE</span>
+              </div>
+
+              <div style={{ marginTop: 12 }}>
+                <CallDetector />
+              </div>
+            </div>
+
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
+                <div>
+                  <h3 style={styles.h3}>Fraud Prevention Tips</h3>
+                  <div style={styles.muted}>
+                    Common scam call patterns
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: 12, lineHeight: 1.6 }}>
+                <div style={styles.empty}>
+                  📞 Unknown numbers asking for OTP or bank details are usually scams.
+                </div>
+                <div style={styles.empty}>
+                  ⚠️ Banks or government agencies never ask for OTP or passwords.
+                </div>
+                <div style={styles.empty}>
+                  🔗 Do not trust urgent payment requests during calls.
+                </div>
+                <div style={styles.empty}>
+                  🛡 Always verify suspicious callers before sharing information.
                 </div>
               </div>
             </div>
-
-            <div style={{ marginTop: 12, lineHeight: 1.6 }}>
-              <div style={styles.empty}>
-                📞 Unknown numbers asking for OTP or bank details are usually scams.
-              </div>
-
-              <div style={styles.empty}>
-                ⚠️ Banks or government agencies never ask for OTP or passwords.
-              </div>
-
-              <div style={styles.empty}>
-                🔗 Do not trust urgent payment requests during calls.
-              </div>
-
-              <div style={styles.empty}>
-                🛡 Always verify suspicious callers before sharing information.
-              </div>
-            </div>
           </div>
-        </div>
 
-        <footer style={styles.footer}>
-          Cyber-Neon Theme • Call Fraud Detection Module
-        </footer>
+          <footer style={styles.footer}>
+            Cyber-Neon Theme • Call Fraud Detection Module
+          </footer>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   // ========================= SMS APP =========================
   return (
@@ -368,251 +322,163 @@ if (screen === "call") {
           </div>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-            {/* BACK button to choose mode */}
             <button style={styles.btnOutlineGreen} onClick={() => setScreen("choose")}>
               ← Back
             </button>
 
             <div style={styles.tabs}>
-              <button
-                style={{ ...styles.tabBtn, ...(tab === "detector" ? styles.tabOn : {}) }}
-                onClick={() => setTab("detector")}
-              >
+              <button style={{ ...styles.tabBtn, ...styles.tabOn }}>
                 Detector
               </button>
-              <button
-                style={{ ...styles.tabBtn, ...(tab === "metrics" ? styles.tabOn : {}) }}
-                onClick={() => setTab("metrics")}
-              >
-                Accuracy & Matrix
-              </button>
+              {/* Accuracy & Matrix button removed */}
             </div>
           </div>
         </header>
 
-        {tab === "detector" ? (
-          <div style={styles.twoCol}>
-            {/* Left */}
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                <h3 style={styles.h3}>Check Message</h3>
-                <span style={styles.pillGreen}>LIVE</span>
-              </div>
-
-              <textarea
-                value={sms}
-                onChange={(e) => setSms(e.target.value)}
-                placeholder="URGENT! Your bank account is blocked. Click link now..."
-                style={styles.textarea}
-              />
-
-              <div style={styles.row}>
-                <button
-                  onClick={checkSMS}
-                  disabled={!sms.trim() || loading}
-                  style={{
-                    ...styles.btnGreen,
-                    opacity: !sms.trim() || loading ? 0.6 : 1,
-                    cursor: !sms.trim() || loading ? "not-allowed" : "pointer",
-                  }}
-                >
-                  {loading ? "Scanning..." : "Check SMS"}
-                </button>
-
-                <button onClick={clearAll} style={styles.btnPurple}>
-                  Clear
-                </button>
-              </div>
-
-              {error && <div style={styles.alert}>{error}</div>}
-
-              <div style={{ marginTop: 16 }}>
-                <h3 style={styles.h3}>Result</h3>
-
-                {!data ? (
-                  <div style={styles.empty}>
-                    No result yet. Paste SMS and press Check.
-                  </div>
-                ) : (
-                  <div style={styles.resultBox}>
-                    <div style={styles.resultTop}>
-                      <span
-                        style={{
-                          ...styles.status,
-                          borderColor: isFraud
-                            ? "rgba(255,60,130,0.8)"
-                            : "rgba(0,255,180,0.8)",
-                          boxShadow: isFraud
-                            ? "0 0 18px rgba(255,60,130,0.25)"
-                            : "0 0 18px rgba(0,255,180,0.22)",
-                        }}
-                      >
-                        {data.prediction}
-                      </span>
-
-                      <div style={styles.kv}>
-                        <span style={styles.k}>Confidence</span>
-                        <span style={styles.v}>{data.confidence.toFixed(2)}%</span>
-                      </div>
-
-                      <div style={styles.meter}>
-                        <div style={{ ...styles.fill, width: `${confidenceWidth}%` }} />
-                      </div>
-
-                      {/* Risk Level */}
-                      <div style={{ marginTop: 8, fontWeight: 950, fontSize: 13 }}>
-                        Risk Level:{" "}
-                        <span style={{ color: riskColor, textShadow: `0 0 12px ${riskColor}55` }}>
-                          {riskLevel}
-                        </span>
-                      </div>
-
-                      <div style={{ marginTop: 12 }}>
-                        <div style={styles.smallLabel}>Risky Words</div>
-                        {data.risky_words?.length ? (
-                          <div style={styles.chips}>
-                            {data.risky_words.map((w) => (
-                              <Chip key={w} text={w} />
-                            ))}
-                          </div>
-                        ) : (
-                          <div style={styles.muted}>None found.</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+        <div style={styles.twoCol}>
+          {/* Left */}
+          <div style={styles.card}>
+            <div style={styles.cardHeader}>
+              <h3 style={styles.h3}>Check Message</h3>
+              <span style={styles.pillGreen}>LIVE</span>
             </div>
 
-            {/* Right */}
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                <div>
-                  <h3 style={styles.h3}>History</h3>
-                  <div style={styles.muted}>
-                    Last {history.length} checks (saved on this PC)
-                  </div>
-                </div>
-                <div style={styles.actions}>
-                  <button onClick={downloadReport} style={styles.btnOutlineGreen}>
-                    Download Report
-                  </button>
-                  <button onClick={clearHistory} style={styles.btnOutlinePink}>
-                    Clear
-                  </button>
-                </div>
-              </div>
+            <textarea
+              value={sms}
+              onChange={(e) => setSms(e.target.value)}
+              placeholder="URGENT! Your bank account is blocked. Click link now..."
+              style={styles.textarea}
+            />
 
-              {history.length === 0 ? (
-                <div style={styles.empty}>No history yet.</div>
+            <div style={styles.row}>
+              <button
+                onClick={checkSMS}
+                disabled={!sms.trim() || loading}
+                style={{
+                  ...styles.btnGreen,
+                  opacity: !sms.trim() || loading ? 0.6 : 1,
+                  cursor: !sms.trim() || loading ? "not-allowed" : "pointer",
+                }}
+              >
+                {loading ? "Scanning..." : "Check SMS"}
+              </button>
+
+              <button onClick={clearAll} style={styles.btnPurple}>
+                Clear
+              </button>
+            </div>
+
+            {error && <div style={styles.alert}>{error}</div>}
+
+            <div style={{ marginTop: 16 }}>
+              <h3 style={styles.h3}>Result</h3>
+
+              {!data ? (
+                <div style={styles.empty}>
+                  No result yet. Paste SMS and press Check.
+                </div>
               ) : (
-                <div style={styles.historyList}>
-                  {history.map((h, i) => {
-                    const fraud = h.prediction.toUpperCase().includes("FRAUD");
-                    return (
-                      <div key={i} style={styles.historyItem}>
-                        <div style={styles.historyTop}>
-                          <span style={styles.time}>{h.time}</span>
-                          <span
-                            style={{
-                              ...styles.miniTag,
-                              borderColor: fraud
-                                ? "rgba(255,60,130,0.8)"
-                                : "rgba(0,255,180,0.8)",
-                            }}
-                          >
-                            {h.prediction} • {h.confidence.toFixed(2)}%
-                          </span>
+                <div style={styles.resultBox}>
+                  <div style={styles.resultTop}>
+                    <span
+                      style={{
+                        ...styles.status,
+                        borderColor: isFraud
+                          ? "rgba(255,60,130,0.8)"
+                          : "rgba(0,255,180,0.8)",
+                        boxShadow: isFraud
+                          ? "0 0 18px rgba(255,60,130,0.25)"
+                          : "0 0 18px rgba(0,255,180,0.22)",
+                      }}
+                    >
+                      {data.prediction}
+                    </span>
+
+                    <div style={styles.kv}>
+                      <span style={styles.k}>Confidence</span>
+                      <span style={styles.v}>{data.confidence.toFixed(2)}%</span>
+                    </div>
+
+                    <div style={styles.meter}>
+                      <div style={{ ...styles.fill, width: `${confidenceWidth}%` }} />
+                    </div>
+
+                    <div style={{ marginTop: 8, fontWeight: 950, fontSize: 13 }}>
+                      Risk Level:{" "}
+                      <span style={{ color: riskColor, textShadow: `0 0 12px ${riskColor}55` }}>
+                        {riskLevel}
+                      </span>
+                    </div>
+
+                    <div style={{ marginTop: 12 }}>
+                      <div style={styles.smallLabel}>Risky Words</div>
+                      {data.risky_words?.length ? (
+                        <div style={styles.chips}>
+                          {data.risky_words.map((w) => (
+                            <Chip key={w} text={w} />
+                          ))}
                         </div>
-                        <div style={styles.msg}>{h.message}</div>
-                        <div style={styles.riskyLine}>
-                          Risky: <b>{h.risky_words.join(", ") || "None"}</b>
-                        </div>
-                      </div>
-                    );
-                  })}
+                      ) : (
+                        <div style={styles.muted}>None found.</div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
           </div>
-        ) : (
+
+          {/* Right */}
           <div style={styles.card}>
             <div style={styles.cardHeader}>
               <div>
-                <h3 style={styles.h3}>Accuracy & Confusion Matrix</h3>
+                <h3 style={styles.h3}>History</h3>
                 <div style={styles.muted}>
-                  Computed from dataset using saved model + fixed test split
+                  Last {history.length} checks (saved on this PC)
                 </div>
               </div>
-              <button onClick={loadMetrics} style={styles.btnOutlineGreen}>
-                Refresh
-              </button>
+              <div style={styles.actions}>
+                <button onClick={downloadReport} style={styles.btnOutlineGreen}>
+                  Download Report
+                </button>
+                <button onClick={clearHistory} style={styles.btnOutlinePink}>
+                  Clear
+                </button>
+              </div>
             </div>
 
-            {metricsLoading && <div style={styles.muted}>Loading...</div>}
-            {metricsErr && <div style={styles.alert}>{metricsErr}</div>}
-
-            {metrics && (
-              <div style={{ marginTop: 10 }}>
-                <div style={styles.metricRow}>
-                  <div style={styles.metricCard}>
-                    <div style={styles.metricLabel}>Accuracy</div>
-                    <div style={styles.metricValue}>{metrics.accuracy}%</div>
-                    <div style={styles.muted}>Overall correct predictions</div>
-                  </div>
-
-                  <div style={styles.metricCard}>
-                    <div style={styles.metricLabel}>Meaning</div>
-                    <div style={styles.muted}>
-                      TN/TP good • FP/FN are mistakes (explained in matrix)
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ marginTop: 12 }}>
-                  <div style={styles.smallLabel}>Confusion Matrix</div>
-
-                  <div style={styles.matrix}>
-                    <div style={styles.matrixHead}>
-                      <div />
-                      <div style={styles.matrixTitle}>Pred Safe (0)</div>
-                      <div style={styles.matrixTitle}>Pred Fraud (1)</div>
-                    </div>
-
-                    <div style={styles.matrixRow}>
-                      <div style={styles.matrixSide}>Actual Safe (0)</div>
-                      <div style={styles.cell}>
-                        {metrics.confusion_matrix[0][0]}{" "}
-                        <span style={styles.cellHint}>TN</span>
+            {history.length === 0 ? (
+              <div style={styles.empty}>No history yet.</div>
+            ) : (
+              <div style={styles.historyList}>
+                {history.map((h, i) => {
+                  const fraud = h.prediction.toUpperCase().includes("FRAUD");
+                  return (
+                    <div key={i} style={styles.historyItem}>
+                      <div style={styles.historyTop}>
+                        <span style={styles.time}>{h.time}</span>
+                        <span
+                          style={{
+                            ...styles.miniTag,
+                            borderColor: fraud
+                              ? "rgba(255,60,130,0.8)"
+                              : "rgba(0,255,180,0.8)",
+                          }}
+                        >
+                          {h.prediction} • {h.confidence.toFixed(2)}%
+                        </span>
                       </div>
-                      <div style={styles.cell}>
-                        {metrics.confusion_matrix[0][1]}{" "}
-                        <span style={styles.cellHint}>FP</span>
+                      <div style={styles.msg}>{h.message}</div>
+                      <div style={styles.riskyLine}>
+                        Risky: <b>{h.risky_words.join(", ") || "None"}</b>
                       </div>
                     </div>
-
-                    <div style={styles.matrixRow}>
-                      <div style={styles.matrixSide}>Actual Fraud (1)</div>
-                      <div style={styles.cell}>
-                        {metrics.confusion_matrix[1][0]}{" "}
-                        <span style={styles.cellHint}>FN</span>
-                      </div>
-                      <div style={styles.cell}>
-                        {metrics.confusion_matrix[1][1]}{" "}
-                        <span style={styles.cellHint}>TP</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={{ marginTop: 10, ...styles.muted }}>
-                    TN: correctly safe • TP: correctly fraud • FP: safe predicted as fraud • FN: fraud predicted as safe
-                  </div>
-                </div>
+                  );
+                })}
               </div>
             )}
           </div>
-        )}
+        </div>
 
         <footer style={styles.footer}>
           Cyber-Neon Theme • Built for Mini Project Demo
@@ -663,7 +529,6 @@ const styles: Record<string, React.CSSProperties> = {
     filter: "blur(90px)",
     pointerEvents: "none",
   },
-
   blurLayer: {
     position: "absolute",
     inset: 0,
@@ -697,8 +562,6 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: "0 0 18px rgba(0,255,180,0.12)",
     fontSize: 24,
   },
-
-  // UPDATED (bigger text)
   modalTitle: { margin: 0, fontSize: 28, fontWeight: 950 },
   modalText: {
     margin: "10px 0 14px",
@@ -707,7 +570,6 @@ const styles: Record<string, React.CSSProperties> = {
     lineHeight: 1.6,
   },
   modalFoot: { marginTop: 12, fontSize: 13, color: "rgba(255,255,255,0.55)" },
-
   modeCard: {
     width: "100%",
     textAlign: "left",
@@ -726,11 +588,10 @@ const styles: Record<string, React.CSSProperties> = {
     placeItems: "center",
     background: "rgba(255,255,255,0.06)",
     border: "1px solid rgba(255,255,255,0.14)",
-    fontSize: 24, // UPDATED
+    fontSize: 24,
   },
-  modeTitle: { fontWeight: 950,color:"rgba(0,255,180,0.95)", fontSize: 18 }, // UPDATED
-  modeSub: { fontSize: 14, color: "rgba(255,255,255,0.70)", marginTop: 6 }, // UPDATED
-
+  modeTitle: { fontWeight: 950,color:"rgba(0,255,180,0.95)", fontSize: 18 },
+  modeSub: { fontSize: 14, color: "rgba(255,255,255,0.70)", marginTop: 6 },
   shell: { maxWidth: 1120, margin: "0 auto", position: "relative" },
   header: {
     display: "flex",
@@ -752,7 +613,6 @@ const styles: Record<string, React.CSSProperties> = {
   },
   title: { margin: 0, fontSize: 28, letterSpacing: 0.2 },
   sub: { margin: "6px 0 0", fontSize: 13, color: "rgba(255,255,255,0.68)" },
-
   tabs: { display: "flex", gap: 8 },
   tabBtn: {
     padding: "10px 12px",
@@ -767,9 +627,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderColor: "rgba(0,255,180,0.45)",
     boxShadow: "0 0 16px rgba(0,255,180,0.12)",
   },
-
-  twoCol: { display: "grid", gridTemplateColumns: "1.15fr 0.85fr", gap: 14 },
-
+  twoCol: { display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 14 },
   card: {
     background: "rgba(8,10,22,0.60)",
     border: "1px solid rgba(255,255,255,0.12)",
@@ -778,7 +636,6 @@ const styles: Record<string, React.CSSProperties> = {
     backdropFilter: "blur(12px)",
     boxShadow: "0 22px 70px rgba(0,0,0,0.45)",
   },
-
   cardHeader: {
     display: "flex",
     justifyContent: "space-between",
@@ -787,10 +644,8 @@ const styles: Record<string, React.CSSProperties> = {
     flexWrap: "wrap",
     marginBottom: 10,
   },
-
   h3: { margin: 0, fontSize: 16, color: "rgba(255,255,255,0.92)" },
   muted: { fontSize: 12, color: "rgba(255,255,255,0.65)" },
-
   pillGreen: {
     padding: "7px 10px",
     borderRadius: 999,
@@ -800,7 +655,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 12,
     fontWeight: 900,
   },
-
   textarea: {
     width: "100%",
     minHeight: 150,
@@ -814,9 +668,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 14,
     lineHeight: 1.45,
   },
-
   row: { display: "flex", gap: 10, marginTop: 12, alignItems: "center", flexWrap: "wrap" },
-
   btnGreen: {
     border: "1px solid rgba(0,255,180,0.35)",
     borderRadius: 14,
@@ -827,7 +679,6 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: "0 0 18px rgba(0,255,180,0.12)",
     cursor: "pointer",
   },
-
   btnPurple: {
     border: "1px solid rgba(167,139,250,0.35)",
     borderRadius: 14,
@@ -838,7 +689,6 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: "0 0 18px rgba(167,139,250,0.12)",
     cursor: "pointer",
   },
-
   btnOutlineGreen: {
     border: "1px solid rgba(0,255,180,0.35)",
     borderRadius: 14,
@@ -857,9 +707,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: "rgba(255,60,130,0.07)",
     cursor: "pointer",
   },
-
   actions: { display: "flex", gap: 8, flexWrap: "wrap" },
-
   alert: {
     marginTop: 10,
     padding: 10,
@@ -867,7 +715,6 @@ const styles: Record<string, React.CSSProperties> = {
     border: "1px solid rgba(255,60,130,0.35)",
     background: "rgba(255,60,130,0.10)",
   },
-
   empty: {
     marginTop: 10,
     padding: 12,
@@ -876,7 +723,6 @@ const styles: Record<string, React.CSSProperties> = {
     background: "rgba(0,0,0,0.18)",
     color: "rgba(255,255,255,0.70)",
   },
-
   resultBox: {
     borderRadius: 16,
     border: "1px solid rgba(255,255,255,0.12)",
@@ -884,7 +730,6 @@ const styles: Record<string, React.CSSProperties> = {
     padding: 12,
   },
   resultTop: { display: "flex", flexDirection: "column", gap: 10 },
-
   status: {
     display: "inline-flex",
     width: "fit-content",
@@ -895,11 +740,9 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 950,
     letterSpacing: 0.2,
   },
-
   kv: { display: "flex", justifyContent: "space-between", fontSize: 13 },
   k: { color: "rgba(255,255,255,0.70)" },
   v: { fontWeight: 950 },
-
   meter: {
     height: 10,
     borderRadius: 999,
@@ -914,7 +757,6 @@ const styles: Record<string, React.CSSProperties> = {
       "linear-gradient(90deg, rgba(0,255,180,0.95), rgba(167,139,250,0.95), rgba(255,60,130,0.90))",
     transition: "width 0.35s ease",
   },
-
   smallLabel: { fontSize: 12, color: "rgba(255,255,255,0.72)", fontWeight: 900 },
   chips: { display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 },
   chip: {
@@ -926,7 +768,6 @@ const styles: Record<string, React.CSSProperties> = {
     color: "rgba(0,255,180,0.92)",
     fontWeight: 850,
   },
-
   historyList: { marginTop: 10, display: "flex", flexDirection: "column", gap: 10, maxHeight: 520, overflow: "auto" },
   historyItem: { borderRadius: 16, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.16)", padding: 12 },
   historyTop: { display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" },
@@ -934,19 +775,5 @@ const styles: Record<string, React.CSSProperties> = {
   miniTag: { padding: "6px 10px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.14)", background: "rgba(0,0,0,0.20)", fontSize: 12, fontWeight: 950 },
   msg: { marginTop: 8, fontSize: 13, lineHeight: 1.35 },
   riskyLine: { marginTop: 6, fontSize: 12, color: "rgba(255,255,255,0.70)" },
-
-  metricRow: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 },
-  metricCard: { borderRadius: 16, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.16)", padding: 14 },
-  metricLabel: { fontSize: 12, color: "rgba(255,255,255,0.72)", fontWeight: 950 },
-  metricValue: { marginTop: 8, fontSize: 28, fontWeight: 980 },
-
-  matrix: { marginTop: 10, borderRadius: 16, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.16)", overflow: "hidden" },
-  matrixHead: { display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", background: "rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.10)" },
-  matrixTitle: { padding: 12, fontSize: 12, fontWeight: 950, color: "rgba(255,255,255,0.82)" },
-  matrixRow: { display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", borderBottom: "1px solid rgba(255,255,255,0.10)" },
-  matrixSide: { padding: 12, fontSize: 12, fontWeight: 950, color: "rgba(255,255,255,0.80)" },
-  cell: { padding: 12, fontSize: 14, fontWeight: 950 },
-  cellHint: { marginLeft: 8, fontSize: 12, color: "rgba(255,255,255,0.55)", fontWeight: 900 },
-
   footer: { marginTop: 14, fontSize: 11, color: "rgba(255,255,255,0.55)" },
 };
