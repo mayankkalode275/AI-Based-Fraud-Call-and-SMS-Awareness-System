@@ -38,7 +38,21 @@ def extract_text_features(audio_path):
         
         # Simple keyword-based detection for demo
         duration = len(y) / sr
-        keywords = ["bank", "otp", "blocked", "lottery", "prize", "urgent"]
+        keywords = [keywords = [
+    "bank", "otp", "blocked", "lottery", "prize", "urgent",
+    "account", "verify", "verification", "update", "suspend", "suspended",
+    "kyc", "click", "link", "http", "www", "login", "password",
+    "reward", "bonus", "cashback", "offer", "gift", "free",
+    "win", "won", "winner", "congratulations",
+    "loan", "credit", "debit", "card", "atm",
+    "payment", "transaction", "refund", "processing fee",
+    "limited", "act now", "immediately", "hurry",
+    "claim", "selected", "eligible",
+    "security", "alert", "unauthorized",
+    "confirm", "details", "information",
+    "sim", "blocked", "reactivate",
+    "income tax", "pan", "aadhaar"
+]]
         
         # Mock transcript based on audio characteristics
         if duration < 10:  # Short calls = suspicious

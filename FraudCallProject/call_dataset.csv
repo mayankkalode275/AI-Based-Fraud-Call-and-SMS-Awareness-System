@@ -1,11 +1,155 @@
 text,label
-Hello sir your bank account will be blocked please share your OTP,1
-Congratulations you have won a lottery please send processing fee,1
-This is Amazon delivery your package will arrive tomorrow,0
-Hello this is customer care regarding your complaint,0
-Your KYC is pending please update your bank details now,1
-Reminder your electricity bill is due tomorrow,0
-Your loan has been approved send verification fee,1
-Your order has been successfully delivered thank you,0
-You have won a car in lucky draw please contact immediately,1
-Your OTP for login is 459231 do not share it with anyone,0
+URGENT your bank account is locked click link to verify,1
+Win ₹50000 cash prize click here now,1
+Dear user your ATM card will be blocked update details,1
+You have received a refund click link to claim,1
+Free recharge available claim now limited offer,1
+Your PAN card is suspended verify immediately,1
+Congratulations you are selected for lucky draw prize,1
+Send OTP to confirm your transaction,1
+You won iPhone 14 click link to claim reward,1
+Immediate action required update KYC details,1
+Click here to avoid account suspension,1
+Your Paytm account needs verification click link,1
+Bank alert suspicious activity verify now,1
+Limited offer claim your cashback now,1
+You are selected for government scheme send details,1
+Claim your insurance bonus now click link,1
+Your debit card is blocked contact immediately,1
+You have won free tickets click here,1
+Act now or your account will be deactivated,1
+Send your details to receive prize money,1
+
+Meeting is scheduled at 5 PM today,0
+Your cab has arrived at pickup location,0
+Your recharge was successful thank you,0
+Package dispatched and will reach soon,0
+Your electricity bill has been paid successfully,0
+Doctor appointment confirmed for tomorrow,0
+Your order is out for delivery,0
+Salary has been credited to your account,0
+Your train ticket is confirmed,0
+Reminder: team meeting tomorrow morning,0
+Your food order is being prepared,0
+OTP for your login is 783921,0
+Your account balance is updated,0
+Payment of ₹500 received successfully,0
+Welcome to our service thank you for joining,0
+Your subscription has been renewed,0
+Your request has been processed successfully,0
+Your parcel is shipped via courier,0
+Your booking is confirmed,0
+Invoice for your purchase is attached,0
+Your bank account has been temporarily suspended click here to verify,1
+Immediate action required update your KYC to avoid blocking,1
+You have won ₹1,00,000 lottery claim now by sending details,1
+Click this link to receive your cashback reward instantly,1
+Your debit card will expire update details now,1
+Congratulations you are selected for free vacation claim now,1
+Send your OTP to complete verification process,1
+Your account is at risk secure it immediately click link,1
+Get instant loan approval send processing fee now,1
+You have been selected for government subsidy apply now,1
+Click link to update your PAN card details urgently,1
+Your mobile number has won a lucky draw prize claim now,1
+Verify your bank details to receive pending refund,1
+Your SIM will be blocked update KYC immediately,1
+You are eligible for prize money send account details,1
+Urgent verify your account to avoid suspension,1
+Claim your free gift card now click here,1
+Send verification code to confirm your transaction,1
+You won a reward voucher click to redeem now,1
+Update your account info to avoid deactivation,1
+Get double cashback on your account click now,1
+Confirm your identity by sharing OTP,1
+Your account needs urgent verification click link,1
+Limited time offer claim your prize money now,1
+You have won free recharge click link to activate,1
+
+Your meeting is rescheduled to tomorrow morning,0
+Your flight booking is confirmed have a safe journey,0
+Your order will be delivered by evening,0
+Thank you for your payment your transaction is successful,0
+Reminder your bill payment is due in 2 days,0
+Your cab ride has been completed successfully,0
+OTP for your secure login is 921834,0
+Your subscription will expire next week,0
+Your parcel is ready for pickup,0
+Welcome your account has been created successfully,0
+Payment received thank you for using our service,0
+Your package has been delivered successfully,0
+Your ticket has been booked successfully,0
+Your recharge is completed successfully,0
+Reminder: doctor appointment tomorrow at 10 AM,0
+Your courier is out for delivery,0
+Account statement is available for download,0
+Your booking has been confirmed,0
+You have logged in successfully,0
+Your order has been shipped and is on the way,0
+Your payment failed please try again,0
+Transaction alert ₹200 debited from your account,0
+Welcome to our platform enjoy our services,0
+Your password has been changed successfully,0
+Thank you for shopping with us,0
+
+Your account will be suspended update details immediately,1
+Click here to verify your bank account now,1
+You have won ₹2 lakh lottery claim now,1
+Send OTP to confirm your bank transaction,1
+Your debit card is blocked click link to activate,1
+Limited time offer claim your free gift now,1
+Urgent action required verify your KYC now,1
+You are selected for lucky draw send details,1
+Claim your cashback reward instantly click here,1
+Your account is under review verify immediately,1
+You have won free mobile recharge click now,1
+Update your account details to avoid suspension,1
+Send your bank details to receive prize money,1
+Click link to receive your refund now,1
+Your PAN card is suspended update details,1
+Get instant loan approval send processing fee,1
+Your SIM will be deactivated update KYC,1
+You are eligible for reward claim now,1
+Confirm your identity by sharing OTP,1
+You won a free iPhone claim your prize now,1
+Act now to avoid account blocking,1
+You have been selected for free trip claim now,1
+Your bank account is locked click to unlock,1
+Claim your bonus reward before it expires,1
+Your number has won a lucky prize contact now,1
+Verify your account to receive pending cashback,1
+Click link to update your details now,1
+You are selected for government scheme apply now,1
+Send OTP to complete verification,1
+Get your prize money now click here,1
+
+Your OTP is 847392 do not share it,0
+Your order has been shipped successfully,0
+Your package will be delivered tomorrow,0
+Reminder your electricity bill is due,0
+Your recharge is successful thank you,0
+Your account balance is updated,0
+Your ticket booking is confirmed,0
+Your payment has been processed successfully,0
+Welcome to our service enjoy using it,0
+Your appointment is scheduled tomorrow,0
+Your food order is on the way,0
+Your courier is out for delivery,0
+Payment of ₹1000 received successfully,0
+Your train ticket is confirmed,0
+Your request has been completed,0
+Your subscription is active,0
+Thank you for your purchase,0
+Your login was successful,0
+Your password has been changed,0
+Your parcel has been delivered,0
+Your invoice is generated,0
+Your bank statement is ready,0
+Your recharge is completed,0
+Your bill payment is successful,0
+Meeting is scheduled at 4 PM today,0
+Reminder: doctor appointment tomorrow,0
+Your cab has arrived,0
+Payment failed please try again,0
+Transaction alert ₹500 debited,0
+Your request is under process,0
