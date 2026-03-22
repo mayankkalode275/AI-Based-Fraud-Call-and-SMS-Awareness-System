@@ -183,7 +183,7 @@ export default function App() {
 
         <div style={styles.centerWrap}>
           <div style={styles.modal}>
-            <h2 style={styles.modalTitle}>Choose Detector Mode</h2>
+            <h2 style={styles.modalTitle}>Choose Detection Mode</h2>
             <p style={styles.modalText}>Select what you want to analyze:</p>
 
             <div style={{ display: "grid", gap: 12, marginTop: 14 }}>

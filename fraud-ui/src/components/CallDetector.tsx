@@ -3,60 +3,52 @@ import axios from "axios";
 
 const CallDetector: React.FC = () => {
 
-  const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState("");
   const [transcript, setTranscript] = useState("");
   const [confidence, setConfidence] = useState(0);
+  const [voiceType, setVoiceType] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const selectedFile = e.target.files[0];
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
 
-      setFile(selectedFile);
-      setResult("");
-      setTranscript("");
-      setStatus("📁 File selected... Processing started");
+    const file = e.target.files[0];
 
-      uploadCallAuto(selectedFile);
-    }
-  };
+    setStatus("📁 Uploading & Processing...");
+    setLoading(true);
 
-  const uploadCallAuto = async (selectedFile: File) => {
     const formData = new FormData();
-    formData.append("audio", selectedFile);
+    formData.append("audio", file);
 
     try {
-      setLoading(true);
-
-      const response = await axios.post(
+      const res = await axios.post(
         "http://localhost:5001/predict_call",
         formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" }
-        }
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      setStatus("✅ File processed successfully!");
-      setResult(response.data.prediction);
-      setTranscript(response.data.transcript);
-      setConfidence(response.data.confidence);
+      setResult(res.data.prediction || "");
+      setTranscript(res.data.transcript || "");
+      setConfidence(res.data.confidence || 0);
+      setVoiceType(res.data.voice_type || "");
+      setStatus("✅ Detection Complete");
 
-    } catch {
+    } catch (err) {
+      console.error(err);
       setStatus("❌ Error processing file");
     } finally {
       setLoading(false);
     }
   };
 
-  const percentage = Math.round(confidence * 100);
+  const percentage = Math.round(confidence);
   const isScam = result.includes("SCAM");
 
   return (
-    <div>
+    <div style={styles.container}>
 
-      {/* Upload */}
+      {/* Upload Button */}
       <label style={styles.btnGreen}>
         Upload Call Recording
         <input
@@ -70,79 +62,99 @@ const CallDetector: React.FC = () => {
       {/* Buttons */}
       <div style={styles.row}>
         <button style={styles.btnGreen}>
-          {loading ? "Processing..." : "Auto Detect Enabled"}
+          {loading ? "Processing..." : "Ready for Detection"}
         </button>
 
-        <button style={styles.btnPurple} onClick={() => {
-          setFile(null);
-          setResult("");
-          setTranscript("");
-          setConfidence(0);
-          setStatus("");
-        }}>
+        <button
+          style={styles.btnPurple}
+          onClick={() => {
+            setResult("");
+            setTranscript("");
+            setConfidence(0);
+            setVoiceType("");
+            setStatus("");
+          }}
+        >
           Clear
         </button>
       </div>
 
       {/* Status */}
-      {status && (
-        <div style={styles.status}>{status}</div>
-      )}
+      <div style={styles.status}>
+        {status || "Upload a call recording to analyze"}
+      </div>
 
       {/* Transcript */}
-      {transcript && (
-        <div style={styles.text}>
-          <b>Caller said:</b> {transcript}
+      <div style={styles.card}>
+        <b>📝 Transcript:</b>
+        <div style={{ marginTop: 6 }}>
+          {transcript || "No transcript yet"}
         </div>
-      )}
+      </div>
+
+      {/* Voice Type */}
+      <div style={styles.card}>
+        <b>🎤 Voice Type:</b>{" "}
+        {voiceType || "Not analyzed"}
+      </div>
 
       {/* Result */}
-      {result && (
-        <div style={styles.resultBox}>
+      <div style={styles.resultBox}>
 
-          <div style={{
-            fontSize: 20,
-            fontWeight: "bold",
-            color: isScam ? "#ff3c82" : "#00ffb4"
-          }}>
-            {result}
-          </div>
+        <div style={{
+          fontSize: 22,
+          fontWeight: "bold",
+          color: result
+            ? (isScam ? "#ff3c82" : "#00ffb4")
+            : "#aaa"
+        }}>
+          {result || "No result yet"}
+        </div>
 
-          <div style={{
-            marginTop: 8,
-            fontSize: 16,
-            color: isScam ? "#ff3c82" : "#00ffb4"
-          }}>
-            {percentage}% confidence
-          </div>
+        <div style={{
+          marginTop: 8,
+          fontSize: 16,
+          color: "#aaa"
+        }}>
+          {result
+            ? `${percentage}% confidence`
+            : "Confidence will appear here"}
+        </div>
 
-          {/* Progress Bar */}
-          <div style={styles.bar}>
-            <div style={{
+        {/* Progress Bar */}
+        <div style={styles.bar}>
+          <div
+            style={{
               ...styles.fill,
               width: `${percentage}%`
-            }} />
-          </div>
-
+            }}
+          />
         </div>
-      )}
+
+      </div>
 
     </div>
   );
 };
 
-const styles = {
+const styles: any = {
+
+  container: {
+    padding: 20,
+    display: "flex",
+    flexDirection: "column",
+    gap: 14
+  },
 
   row: {
     display: "flex",
-    gap: 12,
-    marginTop: 15
+    gap: 12
   },
 
   btnGreen: {
     border: "1px solid rgba(0,255,180,0.35)",
     borderRadius: 14,
-    padding: "10px 14px",
+    padding: "10px 16px",
     fontWeight: 900,
     color: "rgba(0,255,180,0.95)",
     background: "rgba(0,255,180,0.08)",
@@ -152,7 +164,7 @@ const styles = {
   btnPurple: {
     border: "1px solid rgba(167,139,250,0.35)",
     borderRadius: 14,
-    padding: "10px 14px",
+    padding: "10px 16px",
     fontWeight: 900,
     color: "rgba(167,139,250,0.95)",
     background: "rgba(167,139,250,0.08)",
@@ -160,31 +172,35 @@ const styles = {
   },
 
   status: {
-    marginTop: 12,
     fontWeight: 700,
-    color: "#00ffb4"
+    color: "#00ffb4",
+    minHeight: 20
   },
 
-  text: {
-    marginTop: 12,
-    color: "rgba(255,255,255,0.8)"
+  card: {
+    padding: 12,
+    borderRadius: 14,
+    border: "1px solid rgba(255,255,255,0.1)",
+    background: "rgba(0,0,0,0.2)"
   },
 
   resultBox: {
-    marginTop: 20
+    marginTop: 10
   },
 
   bar: {
-    height: 8,
+    height: 10,
     borderRadius: 999,
     background: "rgba(255,255,255,0.1)",
-    marginTop: 10
+    marginTop: 10,
+    overflow: "hidden"
   },
 
   fill: {
     height: "100%",
     borderRadius: 999,
-    background: "linear-gradient(90deg,#00ffb4,#a78bfa,#ff3c82)"
+    background:
+      "linear-gradient(90deg,#00ffb4,#a78bfa,#ff3c82)"
   }
 
 };
