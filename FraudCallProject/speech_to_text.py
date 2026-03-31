@@ -1,7 +1,7 @@
 import librosa
 import numpy as np
 
-# 🔹 SIMPLE MOCK TRANSCRIPT (FAST + SAFE)
+# 🔹 TRANSCRIPT (same logic – no change)
 def convert_audio_to_text(audio_path):
     try:
         y, sr = librosa.load(audio_path, sr=16000)
@@ -19,29 +19,20 @@ def convert_audio_to_text(audio_path):
         return "your bank account is blocked share otp"
 
 
-# 🔹 VOICE TYPE DETECTION
-def detect_voice_type(y, sr):
-    import numpy as np
-    import librosa
+# 🔹 NEW: EXTRACT WAVEFORM FOR FRONTEND GRAPH
+def extract_waveform(audio_path):
+    try:
+        y, sr = librosa.load(audio_path, sr=16000)
 
-    pitch = librosa.yin(y, fmin=50, fmax=300)
-    energy = np.mean(librosa.feature.rms(y=y))
-    zcr = np.mean(librosa.feature.zero_crossing_rate(y))
+        # Normalize waveform
+        y = y / np.max(np.abs(y))
 
-    pitch_var = np.var(pitch)
-    pitch_mean = np.mean(pitch)
+        # Downsample (important for performance)
+        step = max(1, len(y) // 500)  # limit to ~500 points
+        waveform = y[::step]
 
-    print("Pitch Var:", pitch_var)
-    print("Pitch Mean:", pitch_mean)
-    print("Energy:", energy)
-    print("ZCR:", zcr)
+        return waveform.tolist()
 
-    # ✅ Better logic
-    if pitch_var < 5 and zcr < 0.04 and energy < 0.02:
-        return "🤖 BOT VOICE"
-
-    elif pitch_var > 20 and zcr > 0.05:
-        return "🧑 HUMAN VOICE"
-
-    else:
-        return "⚠️ UNCERTAIN / MIXED VOICE"
+    except Exception as e:
+        print("Waveform Error:", e)
+        return []

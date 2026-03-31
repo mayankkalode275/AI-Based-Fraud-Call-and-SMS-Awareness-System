@@ -4,8 +4,8 @@ import os
 from werkzeug.utils import secure_filename
 import librosa
 
-# Import your modules
-from speech_to_text import convert_audio_to_text, detect_voice_type
+# ✅ Import modules
+from speech_to_text import convert_audio_to_text, extract_waveform
 from predict_call import predict_call
 
 app = Flask(__name__)
@@ -18,6 +18,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 
 
+# ✅ Check file type
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -30,7 +31,6 @@ def home():
 @app.route("/predict_call", methods=["POST"])
 def detect_call():
     print("🎯 UPLOAD RECEIVED")
-    print("FILES:", request.files)
 
     if "audio" not in request.files:
         return jsonify({"error": "No audio file uploaded"}), 400
@@ -40,44 +40,60 @@ def detect_call():
     if file.filename == "":
         return jsonify({"error": "Empty filename"}), 400
 
+    if not allowed_file(file.filename):
+        return jsonify({"error": "Invalid file type"}), 400
+
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
     filename = secure_filename(file.filename)
     filepath = os.path.join(UPLOAD_FOLDER, filename)
 
     try:
-        # Save file
+        # ✅ Save file
         file.save(filepath)
         print(f"💾 Saved: {filepath}")
 
-        # Load audio
-        y, sr = librosa.load(filepath, sr=16000)
-        print("✅ Audio loaded")
+        # ✅ Load audio safely (handles mp3, wav, m4a via librosa backend)
+        try:
+            y, sr = librosa.load(filepath, sr=16000)
+            print("✅ Audio loaded")
+        except Exception as e:
+            print("⚠️ Audio load error:", e)
+            return jsonify({"error": "Unsupported audio format"}), 400
 
-        # Speech to text (SAFE)
+        # ✅ STEP 1: Speech → Text
         try:
             transcript = convert_audio_to_text(filepath)
         except Exception as e:
-            print("⚠️ Whisper failed:", e)
+            print("⚠️ Transcript error:", e)
             transcript = "your bank account is blocked share otp"
 
         print("📝 Transcript:", transcript)
 
-        # Voice detection
-        voice_type = detect_voice_type(y, sr)
-        print("🎤 Voice:", voice_type)
-
-        # Prediction
+        # ✅ STEP 2: Fraud Prediction
         result = predict_call(transcript)
 
-        os.remove(filepath)
+        # ✅ STEP 3: Waveform Extraction
+        try:
+            waveform = extract_waveform(filepath)
+        except Exception as e:
+            print("⚠️ Waveform error:", e)
+            waveform = []
+
+        # ✅ Delete temp file
+        if os.path.exists(filepath):
+            os.remove(filepath)
+
+        print("✅ SUCCESS")
 
         return jsonify({
             "success": True,
-            "prediction": result["prediction"],
-            "confidence": result["confidence"],
+            "prediction": result.get("prediction"),
+            "confidence": result.get("confidence"),
+            "keywords": result.get("keywords", []),   # 🔥 NEW
+            "risk_score": result.get("risk_score", 0),# 🔥 NEW
             "transcript": transcript,
-            "voice_type": voice_type
+            "waveform": waveform
         })
 
     except Exception as e:
