@@ -15,7 +15,7 @@ type HistoryItem = {
   risky_words: string[];
 };
 
-const API = "http://127.0.0.1:5000";
+const API = "https://ai-based-fraud-call-and-sms-awareness.onrender.com";
 
 type Screen = "home" | "choose" | "sms" | "call";
 
@@ -86,6 +86,13 @@ export default function App() {
         "Avoid sharing sensitive information",
         "Double-check unknown links before clicking",
       ];
+    }
+  };
+
+  const clearHistory = () => {
+    if (window.confirm("Are you sure you want to clear all history?")) {
+      setHistory([]);
+      localStorage.removeItem("fraud_history");
     }
   };
 
@@ -213,7 +220,7 @@ export default function App() {
             <h2 style={styles.modalTitle}>Welcome to AI Fraud Detector</h2>
             <p style={styles.modalText}>
               Detect suspicious <b>Fraud Scams</b> using Machine Learning, confidence scores,
-              risky keywords, and real-time call analytics.
+              risky keywords,frequency analysis.
             </p>
             <button style={styles.btnGreen} onClick={() => setScreen("choose")}>Start Protection →</button>
             <div style={styles.modalFoot}>Tip: Keep Flask backend running on <b>127.0.0.1:5000</b></div>
@@ -274,14 +281,12 @@ export default function App() {
           <div style={styles.twoCol}>
             <div style={styles.card}><CallDetector /></div>
             <div style={styles.card}>
-              <h3 style={styles.h3}>Voice Analysis Protocol</h3>
+              <h2 style={styles.h2}>Fraud Prevention Tips</h2>
               <div style={{...styles.empty, textAlign: 'left', marginTop: 15}}>
-                <p>• Speak clearly into the microphone.</p>
-                <p>• The AI detects "Urgency" and "Threat" patterns.</p>
-                <p>• Results are processed per sentence.</p>
-                <div style={{marginTop: 20, padding: 10, border: '1px solid rgba(0,255,180,0.2)', borderRadius: 10, background: 'rgba(0,255,180,0.05)'}}>
-                  <small style={{color: '#00ffb4'}}>Status: AI Voice Core Active</small>
-                </div>
+                <h3>📞Unknown number ask for OTP or bank details are usually scam</h3>
+                <h3>⚠️Banks or Governments agencies never ask for OTPs or passwords</h3>
+                <h3>🔗 Do not trust urgent payment requests during calls</h3>
+                <h3>🛡️Always verify suspicious callers before sharing information</h3>
               </div>
             </div>
           </div>
@@ -329,7 +334,6 @@ export default function App() {
                     <div style={styles.meter}><div style={{ ...styles.fill, width: `${confidenceWidth}%` }} /></div>
                     <div style={{ marginTop: 8, fontWeight: 950, fontSize: 13 }}>Risk Level: <span style={{ color: riskColor }}>{riskLevel}</span></div>
 
-                    {/* LANGUAGE DETECTION UI */}
                     <div style={{ marginTop: 8 }}>
                         <div style={styles.smallLabel}>Detected Language</div>
                         <div style={{ fontWeight: 900, fontSize: 14, color: '#a78bfa' }}>
@@ -339,7 +343,26 @@ export default function App() {
 
                     <div style={{ marginTop: 12 }}>
                       <div style={styles.smallLabel}>Scam Category</div>
-                      <span style={styles.typeBadge}>{detectScamType(sms)}</span>
+                      {(() => {
+                        const scamType = detectScamType(sms);
+                        const scamColor =
+                          scamType === "Banking Scam"
+                            ? "rgba(255,200,0,0.95)"
+                            : scamType === "OTP Scam"
+                            ? "rgba(255,60,130,0.95)"
+                            : "rgba(0,255,180,0.95)";
+
+                        return (
+                          <span style={{ 
+                            ...styles.typeBadge, 
+                            color: scamColor, 
+                            borderColor: scamColor.replace('0.95', '0.4'), 
+                            background: scamColor.replace('0.95', '0.1') 
+                          }}>
+                            {scamType}
+                          </span>
+                        );
+                      })()}
                     </div>
 
                     <div style={{ marginTop: 12 }}>
@@ -379,7 +402,10 @@ export default function App() {
           <div style={styles.card}>
             <div style={styles.cardHeader}>
               <h3 style={styles.h3}>Scan History</h3>
-              <button onClick={downloadReport} style={styles.btnOutlineGreen}>Report</button>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={downloadReport} style={styles.btnOutlineGreen}>Report</button>
+                <button onClick={clearHistory} style={styles.btnOutlinePink}>Clear</button>
+              </div>
             </div>
             <div style={styles.historyList}>
               {history.length === 0 && <div style={styles.muted}>No history yet.</div>}
@@ -422,6 +448,7 @@ const styles: Record<string, React.CSSProperties> = {
   btnGreen: { border: "1px solid #00ffb4", borderRadius: 12, padding: "12px 24px", fontWeight: 900, color: "#00ffb4", background: "rgba(0,255,180,0.08)", cursor: "pointer", transition: "0.2s" },
   btnPurple: { border: "1px solid #a78bfa", borderRadius: 12, padding: "12px 24px", fontWeight: 900, color: "#a78bfa", background: "rgba(167,139,250,0.08)", cursor: "pointer", transition: "0.2s" },
   btnOutlineGreen: { border: "1px solid rgba(0,255,180,0.3)", borderRadius: 10, padding: "6px 12px", fontSize: 12, fontWeight: 700, color: "#00ffb4", background: "transparent", cursor: "pointer" },
+  btnOutlinePink: { border: "1px solid rgba(255,60,130,0.3)", borderRadius: 10, padding: "6px 12px", fontSize: 12, fontWeight: 700, color: "#ff3c82", background: "transparent", cursor: "pointer", transition: "0.2s" },
   modeCard: { width: "100%", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, padding: 16, cursor: "pointer", transition: "0.2s", color: "inherit" },
   modeTop: { display: "flex", gap: 15, alignItems: "center" },
   modeIcon: { fontSize: 24, background: "rgba(255,255,255,0.05)", padding: 10, borderRadius: 12 },
@@ -448,7 +475,7 @@ const styles: Record<string, React.CSSProperties> = {
   meter: { height: 6, borderRadius: 999, background: "rgba(255,255,255,0.1)", overflow: "hidden", marginTop: 4 },
   fill: { height: "100%", background: "linear-gradient(90deg, #00ffb4, #a78bfa, #ff3c82)", transition: "width 0.5s ease-out" },
   smallLabel: { fontSize: 11, color: "rgba(255,255,255,0.5)", fontWeight: 700, textTransform: "uppercase" },
-  typeBadge: { display: "inline-block", marginTop: 5, padding: "5px 12px", borderRadius: 8, background: "rgba(255,200,0,0.1)", color: "#ffc800", border: "1px solid rgba(255,200,0,0.3)", fontSize: 12, fontWeight: 800 },
+  typeBadge: { display: "inline-block", marginTop: 5, padding: "5px 12px", borderRadius: 8, fontSize: 12, fontWeight: 800, border: "1px solid" },
   chips: { display: "flex", flexWrap: "wrap", gap: 6, marginTop: 5 },
   chip: { padding: "4px 10px", borderRadius: 6, border: "1px solid rgba(0,255,180,0.3)", background: "rgba(0,255,180,0.05)", fontSize: 11, color: "#00ffb4", fontWeight: 700 },
   historyList: { display: "flex", flexDirection: "column", gap: 12, maxHeight: 480, overflowY: "auto", paddingRight: 5 },

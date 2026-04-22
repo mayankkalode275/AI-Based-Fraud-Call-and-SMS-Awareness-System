@@ -57,7 +57,7 @@ const CallDetector: React.FC = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:5001/predict_call",
+        "https://ai-based-fraud-call-and-sms-awareness-cweu.onrender.com",
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
