@@ -1,11 +1,11 @@
 from flask import Flask, request, jsonify
-import pickle
 from flask_cors import CORS
-from metrics import compute_metrics
+import pickle
 import re
+from metrics import compute_metrics
 
-app = Flask(__name__)
-CORS(app)
+app = Flask(__name__)   # ✅ FIRST define app
+CORS(app)               # ✅ THEN use CORS
 
 # Load ML model and vectorizer
 model = pickle.load(open("model.pkl", "rb"))
@@ -95,9 +95,9 @@ def predict():
     elif score >= 35 and len(found_risky) >= 2:
         prediction = "FRAUD SMS"
 
-    elif money_flag and ("click" in msg or "link" in msg):
+    elif money_flag and ("click" in msg or "link" in msg or "otp" in msg ):
         prediction = "FRAUD SMS"
-
+ 
     else:
         prediction = "SAFE SMS"
 
@@ -117,10 +117,11 @@ def metrics():
     m = compute_metrics("combined_dataset.csv")
     return jsonify(m)
 
-
+import os
 if __name__ == "__main__":
-    app.run(debug=True)
-    
+    print("🚀 SMS Backend Running")
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)    
     ###call
     from call_rules import detect_call
 
