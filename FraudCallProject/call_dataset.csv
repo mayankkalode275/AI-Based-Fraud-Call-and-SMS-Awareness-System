@@ -153,3 +153,71 @@ Your cab has arrived,0
 Payment failed please try again,0
 Transaction alert ₹500 debited,0
 Your request is under process,0
+
+# 🔥 MORE FRAUD (ADVANCED + REALISTIC)
+Important notice: your bank account will be frozen verify now,1
+Security alert unusual login detected confirm immediately,1
+You have pending refund click to process now,1
+Your account verification is incomplete update now,1
+Final warning your account will be blocked act now,1
+Congratulations you are eligible for cash reward claim today,1
+Update your Aadhaar details to avoid service interruption,1
+You have received bonus amount click to claim instantly,1
+Verify your UPI account to continue transactions,1
+Your loan is approved send processing fee to proceed,1
+Account alert unauthorized activity detected verify immediately,1
+You are selected for special cashback offer claim now,1
+Your ATM card will be disabled update PIN immediately,1
+You have pending payment claim refund now,1
+Click here to activate your reward points,1
+Immediate response required verify account details,1
+Your mobile banking is suspended update details now,1
+Congratulations your number has won jackpot prize,1
+Confirm your KYC details to avoid account freeze,1
+Your account has security issues update immediately,1
+
+# 🔥 HARD FRAUD (TRICKY CASES)
+Hello sir we are calling from bank please confirm your details,1
+This is customer care please share OTP for verification,1
+Your payment is stuck please confirm account details,1
+We noticed unusual activity please verify your identity,1
+Sir your account needs urgent update to avoid blocking,1
+This is RBI notice update your KYC immediately,1
+Dear user your refund is pending confirm your details,1
+We are from Paytm support please share OTP to continue,1
+Your wallet will be blocked unless you verify now,1
+This is urgent security check please confirm your account,1
+
+# 🔥 SAFE (REALISTIC HUMAN MESSAGES)
+Hey are you free for meeting today,0
+Let’s catch up tomorrow evening,0
+Call me when you are available,0
+I have sent you the documents please check,0
+Your Amazon order will arrive tomorrow,0
+Your Swiggy order is delivered enjoy your meal,0
+Recharge done successfully thank you,0
+Your Uber ride has started,0
+Reminder for your exam tomorrow,0
+Your electricity bill is generated,0
+Please review the attached invoice,0
+Your package has been delivered at doorstep,0
+Meeting link shared please join on time,0
+Your salary is credited successfully,0
+Your request is approved,0
+Thank you for contacting support,0
+Your account is active and secure,0
+Your profile is updated successfully,0
+Your login attempt was successful,0
+Welcome back to our platform,0
+
+# 🔥 SAFE BUT CONTAINS RISK WORDS (IMPORTANT FOR MODEL BALANCE)
+Your OTP for login is 567890 do not share,0
+Bank statement is ready for download,0
+Your account balance is ₹5000,0
+Verify your email address to continue,0
+Your payment verification is completed,0
+Your KYC is successfully updated,0
+Click here to view your invoice,0
+Your refund has been processed successfully,0
+Transaction successful ₹200 credited,0
+Your account is verified successfully,0

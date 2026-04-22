@@ -1,6 +1,10 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import os
+import pickle
+import re
+app = Flask(__name__)   # ✅ FIRST define app
+CORS(app)               # ✅ THEN use CORS
+
 from werkzeug.utils import secure_filename
 import librosa
 
@@ -8,8 +12,6 @@ import librosa
 from speech_to_text import convert_audio_to_text, extract_waveform
 from predict_call import predict_call
 
-app = Flask(__name__)
-CORS(app)
 
 UPLOAD_FOLDER = 'tempaudio'
 ALLOWED_EXTENSIONS = {'wav', 'mp3', 'm4a', 'webm', 'ogg'}
@@ -106,6 +108,9 @@ def detect_call():
         return jsonify({"error": str(e)}), 500
 
 
+import os
+
 if __name__ == "__main__":
-    print("🚀 Running on http://localhost:5001")
-    app.run(debug=True, port=5001, use_reloader=False)
+    print("🚀 Call Backend Running")
+    port = int(os.environ.get("PORT", 5001))
+    app.run(host="0.0.0.0", port=port)
